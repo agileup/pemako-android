@@ -49,13 +49,12 @@ public class VirtualLandActivity extends MapActivity {
 	MapController mc;
 	List<Overlay> overlay;
 	TextView status=null; //지도 화면 상단 위도경도 나타내는 텍스트뷰
-	ArrayList<GeoPoint> vertices=new ArrayList<GeoPoint>(); //사용자가 폴리곤 그리기 위해 체크하는 꼭지점들
+	//ArrayList<GeoPoint> vertices=new ArrayList<GeoPoint>(); //사용자가 폴리곤 그리기 위해 체크하는 꼭지점들
 	Polygon myPolygon=null;
 	ImageButton bt_check;
 	ImageButton bt_mission;
 	Context mContext;
 	
-	int check_count=0;
 	MyIconItemizedOverlay buffer_flag_overlay;
 	
 	GeoPoint buffer_geopoint=null; //체크할때 위치값 가져오려면 로케이션 리스너에서 미리 빼놔야 하는듯
@@ -116,11 +115,14 @@ public class VirtualLandActivity extends MapActivity {
 		Bitmap bitmap_redflag=BitmapFactory.decodeResource(getResources(), R.drawable.check_redflag);
 		bitmap_redflag=Bitmap.createScaledBitmap(bitmap_redflag, 50, 50, false);
 		drawable_redflag=new BitmapDrawable(bitmap_redflag);
+		drawable_redflag.setBounds(-drawable_redflag.getIntrinsicWidth()/2,-drawable_redflag.getIntrinsicHeight(),drawable_redflag.getIntrinsicWidth()/2,0);  
 		
 		
 		Bitmap bitmap_blueflag=BitmapFactory.decodeResource(getResources(), R.drawable.check_blueflag);
 		bitmap_blueflag=Bitmap.createScaledBitmap(bitmap_blueflag, 50, 50, false);
 		drawable_blueflag=new BitmapDrawable(bitmap_blueflag);
+		drawable_blueflag.setBounds(-drawable_blueflag.getIntrinsicWidth()/2,-drawable_blueflag.getIntrinsicHeight(),drawable_blueflag.getIntrinsicWidth()/2,0);
+		
 		flagIO=new RemovableItemizedOverlay(drawable_blueflag);
 		
         
@@ -304,7 +306,7 @@ public class VirtualLandActivity extends MapActivity {
         		//Newly Added 20111216
         		flagIO.addOverlayItem(overlayitem);
         		
-        		if(check_count!=0){
+        		if(flagIO.size()>=2){
         			flagIO.getItem(flagIO.size()-2).setMarker(drawable_redflag);
         		}
         		
@@ -333,19 +335,22 @@ public class VirtualLandActivity extends MapActivity {
     			
     			Log.i("Chwang",Integer.toString(overlay.size()));
     			
-        		vertices.add(buffer_geopoint);
+        		//vertices.add(buffer_geopoint);
         		
+        		int numberOfFlags=flagIO.size();
         		
-        		check_count++;
-        		
-        		if(check_count>=4){
+        		if(numberOfFlags>=4){
         			Location loc_first=new Location("First");
-            		loc_first.setLatitude((double)vertices.get(0).getLatitudeE6()/1000000);
-            		loc_first.setLongitude((double)vertices.get(0).getLongitudeE6()/1000000);
+            		//loc_first.setLatitude((double)vertices.get(0).getLatitudeE6()/1000000);
+            		//loc_first.setLongitude((double)vertices.get(0).getLongitudeE6()/1000000);
+            		loc_first.setLatitude(flagIO.createItem(0).getPoint().getLatitudeE6());
+            		loc_first.setLongitude(flagIO.createItem(0).getPoint().getLongitudeE6());
             		
             		Location loc_last=new Location("Last");
-            		loc_last.setLatitude((double)vertices.get(check_count-1).getLatitudeE6()/1000000);
-            		loc_last.setLongitude((double)vertices.get(check_count-1).getLongitudeE6()/1000000);
+            		//loc_last.setLatitude((double)vertices.get(numberOfFlags-1).getLatitudeE6()/1000000);
+            		//loc_last.setLongitude((double)vertices.get(numberOfFlags-1).getLongitudeE6()/1000000);
+            		loc_last.setLatitude(flagIO.createItem(numberOfFlags-1).getPoint().getLatitudeE6());
+            		loc_last.setLongitude(flagIO.createItem(numberOfFlags-1).getPoint().getLongitudeE6());
             		
             		String dist=Float.toString(loc_first.distanceTo(loc_last));
             		
@@ -453,6 +458,7 @@ public class VirtualLandActivity extends MapActivity {
         	}
         }); //end of button_commit.setOnClickListener()
         */
+        
     }//End-of-onCreate
     
     
@@ -590,11 +596,13 @@ public class VirtualLandActivity extends MapActivity {
         	http.setRequestProperty("content-type","application/x-www-form-urlencoded");
         	
         	StringBuffer buffer=new StringBuffer();
-        	int vertices_size=vertices.size();
+        	int vertices_size=flagIO.size();
+        	GeoPoint tmpGeoPoint;
         	
         	for(int i=0; i<vertices_size; i++){
-            	buffer.append("lat").append(i).append("=").append(vertices.get(i).getLatitudeE6()).append("&");
-            	buffer.append("lon").append(i).append("=").append(vertices.get(i).getLongitudeE6()).append("&");
+        		tmpGeoPoint=flagIO.getItem(i).getPoint();
+            	buffer.append("lat").append(i).append("=").append(tmpGeoPoint.getLatitudeE6()).append("&");
+            	buffer.append("lon").append(i).append("=").append(tmpGeoPoint.getLongitudeE6()).append("&");
         	}
         	buffer.append("vertices_size").append("=").append(vertices_size);
         	
@@ -603,11 +611,12 @@ public class VirtualLandActivity extends MapActivity {
         	writer.write(buffer.toString());
         	writer.flush();
         	
-        	//check_count 및 vertices 초기화
-        	check_count=0;
-        	vertices.clear();
-        	
         	//InputStreamReader tmp=new InputStreamReader(http.getInputStream(),"UTF-8");
+        	
+        	
+        	
+        	//flagIO 초기화
+        	flagIO=new RemovableItemizedOverlay(drawable_blueflag);
         	
         	return true;
         	
