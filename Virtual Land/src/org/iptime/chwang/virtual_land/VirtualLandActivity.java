@@ -44,6 +44,8 @@ import java.util.List;
 
 public class VirtualLandActivity extends MapActivity {
 	
+	final String SERVER_ADDR = "http://pemako.iptime.org";
+	
 	LocationListener mLocationListener;
 	MapView mapView;
 	MapController mc;
@@ -54,8 +56,6 @@ public class VirtualLandActivity extends MapActivity {
 	ImageButton bt_check;
 	ImageButton bt_mission;
 	Context mContext;
-	
-	MyIconItemizedOverlay buffer_flag_overlay;
 	
 	GeoPoint buffer_geopoint=null; //체크할때 위치값 가져오려면 로케이션 리스너에서 미리 빼놔야 하는듯
 	OverlayItem buffer_overlayitem=null;
@@ -70,9 +70,9 @@ public class VirtualLandActivity extends MapActivity {
     
     //현재위치 표시 MyItemizedOverlay 선언 및 초기화
     
-	MyIconItemizedOverlay currentIO;
+	CurrentLocationItemizedOverlay currentIO;
 	ArrayList<Tile> tileOverlays=new ArrayList<Tile>();
-	RemovableItemizedOverlay flagIO;
+	FlagItemizedOverlay flagIO;
 	
 	
 	Drawable drawable_redflag;
@@ -105,13 +105,13 @@ public class VirtualLandActivity extends MapActivity {
         mc.setZoom(18);
         
 		
-        //현재위치 오버레이 비트맵 설정 및 MyIconItemizedOverlay 변수 currentIO 초기화
+        //현재위치 오버레이 비트맵 설정 및 CurrentLocationItemizedOverlay 변수 currentIO 초기화
         Bitmap bitmap_current=BitmapFactory.decodeResource(getResources(), R.drawable.current_gp);
 		bitmap_current=Bitmap.createScaledBitmap(bitmap_current, 15, 15, false);
 		Drawable drawable_current=new BitmapDrawable(bitmap_current);
-		currentIO=new MyIconItemizedOverlay(drawable_current);
+		currentIO=new CurrentLocationItemizedOverlay(drawable_current);
 		
-		//플래그 오버레이(check시 표시하는 플래그) 비트맵 설정 및 MyIconItemizedOverlay 변수 flagIO 초기화
+		//플래그 오버레이(check시 표시하는 플래그) 비트맵 설정 및 FlagItemizedOverlay 변수 flagIO 초기화
 		Bitmap bitmap_redflag=BitmapFactory.decodeResource(getResources(), R.drawable.check_redflag);
 		bitmap_redflag=Bitmap.createScaledBitmap(bitmap_redflag, 50, 50, false);
 		drawable_redflag=new BitmapDrawable(bitmap_redflag);
@@ -123,7 +123,7 @@ public class VirtualLandActivity extends MapActivity {
 		drawable_blueflag=new BitmapDrawable(bitmap_blueflag);
 		drawable_blueflag.setBounds(-drawable_blueflag.getIntrinsicWidth()/2,-drawable_blueflag.getIntrinsicHeight(),drawable_blueflag.getIntrinsicWidth()/2,0);
 		
-		flagIO=new RemovableItemizedOverlay(drawable_blueflag);
+		flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
 		
         
         
@@ -171,13 +171,14 @@ public class VirtualLandActivity extends MapActivity {
         			
         			
         			overlay=mapView.getOverlays();
-        			overlay.add(currentIO); //새로운 위치 표시 그리기
-        			buffer_overlayitem=overlayitem; //새로운 위치 표시 그리는 MyIconItemizedOverlay 오브젝트를 전역변수로 저장해둠
+        			overlay.add(currentIO); //새로운 위치 표시 그리기 
+        			//새로운 위치 표시 그리는 OverlayItem 오브젝트를 전역변수로 저장해둠 - 나중에 삭제 용이
+        			buffer_overlayitem=overlayitem;
         			
         			//서버 통신 테스트
         			if(isFirst==true){
         		        try{
-        			        URL url=new URL("http://chwang.iptime.org:8080/vland/tile_request.php");
+        			        URL url=new URL(SERVER_ADDR+"/vland/tile_request.php");
         			    	HttpURLConnection http=(HttpURLConnection)url.openConnection();
         			    	
         			    	http.setDefaultUseCaches(false);
@@ -305,6 +306,7 @@ public class VirtualLandActivity extends MapActivity {
         		
         		//Newly Added 20111216
         		flagIO.addOverlayItem(overlayitem);
+        		Log.i("Chwang","After check, flagIO.size()="+flagIO.size());
         		
         		if(flagIO.size()>=2){
         			flagIO.getItem(flagIO.size()-2).setMarker(drawable_redflag);
@@ -585,7 +587,7 @@ public class VirtualLandActivity extends MapActivity {
     
     private boolean sendVertices(){
     	try{
-        	URL url=new URL("http://chwang.iptime.org/vland/marking.php");
+        	URL url=new URL(SERVER_ADDR+"/vland/marking.php");
         	HttpURLConnection http=(HttpURLConnection)url.openConnection();
         	
         	http.setDefaultUseCaches(false);
@@ -616,7 +618,7 @@ public class VirtualLandActivity extends MapActivity {
         	
         	
         	//flagIO 초기화
-        	flagIO=new RemovableItemizedOverlay(drawable_blueflag);
+        	flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
         	
         	return true;
         	
