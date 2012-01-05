@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 public class CurrentLocationItemizedOverlay extends MyIconItemizedOverlay {
 
 	public CurrentLocationItemizedOverlay(Drawable defaultMarker) {
-		super(boundCenterBottom(defaultMarker));
+		super(boundCenter(defaultMarker));
 	}
 	
 	public void draw(android.graphics.Canvas canvas, MapView mapView, boolean shadow){
