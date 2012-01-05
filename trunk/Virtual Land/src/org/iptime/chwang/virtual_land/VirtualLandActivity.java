@@ -79,6 +79,10 @@ public class VirtualLandActivity extends MapActivity {
 	Drawable drawable_blueflag;
 	
 	
+	
+	PolyLine myPolyLine=null;
+	
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -313,6 +317,20 @@ public class VirtualLandActivity extends MapActivity {
         		}
         		
         		overlay=mapView.getOverlays();
+        		
+        		
+        		
+        		//Flag 사이 선그리기
+        		
+        		if(myPolyLine!=null) overlay.remove(myPolyLine);
+        		ArrayList<GeoPoint> geopoints=new ArrayList<GeoPoint>();
+        		for(int i=0; i<flagIO.size(); i++){
+        			geopoints.add(flagIO.getItem(i).getPoint());
+        		}
+        		myPolyLine=new PolyLine(geopoints);
+        		
+        		
+        		overlay.add(myPolyLine);
         		overlay.add(flagIO);
         		
         		/*
@@ -343,16 +361,12 @@ public class VirtualLandActivity extends MapActivity {
         		
         		if(numberOfFlags>=4){
         			Location loc_first=new Location("First");
-            		//loc_first.setLatitude((double)vertices.get(0).getLatitudeE6()/1000000);
-            		//loc_first.setLongitude((double)vertices.get(0).getLongitudeE6()/1000000);
-            		loc_first.setLatitude(flagIO.createItem(0).getPoint().getLatitudeE6());
-            		loc_first.setLongitude(flagIO.createItem(0).getPoint().getLongitudeE6());
+            		loc_first.setLatitude((double)flagIO.createItem(0).getPoint().getLatitudeE6()/1000000);
+            		loc_first.setLongitude((double)flagIO.createItem(0).getPoint().getLongitudeE6()/1000000);
             		
             		Location loc_last=new Location("Last");
-            		//loc_last.setLatitude((double)vertices.get(numberOfFlags-1).getLatitudeE6()/1000000);
-            		//loc_last.setLongitude((double)vertices.get(numberOfFlags-1).getLongitudeE6()/1000000);
-            		loc_last.setLatitude(flagIO.createItem(numberOfFlags-1).getPoint().getLatitudeE6());
-            		loc_last.setLongitude(flagIO.createItem(numberOfFlags-1).getPoint().getLongitudeE6());
+            		loc_last.setLatitude((double)flagIO.createItem(numberOfFlags-1).getPoint().getLatitudeE6()/1000000);
+            		loc_last.setLongitude((double)flagIO.createItem(numberOfFlags-1).getPoint().getLongitudeE6()/1000000);
             		
             		String dist=Float.toString(loc_first.distanceTo(loc_last));
             		

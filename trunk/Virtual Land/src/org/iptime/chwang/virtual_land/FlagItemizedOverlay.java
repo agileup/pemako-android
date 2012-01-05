@@ -14,6 +14,7 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 	Drawable drawable_blueflag;
 	Context mContext;
 	MapView mMapView;
+	
 	/*
 	public RemovableItemizedOverlay(Drawable defaultMarker){
 		super(boundCenterBottom(defaultMarker));
@@ -42,7 +43,9 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 				public void onClick(DialogInterface dialog, int which) {
 					mOverlays.remove(mIndex);
 					Log.i("Chwang","FlagIO's mOverlays.size()="+Integer.toString(mIndex));
-					if(size()!=0) mOverlays.get(mIndex-1).setMarker(drawable_blueflag);
+					if(size()!=0) {
+						mOverlays.get(mIndex-1).setMarker(drawable_blueflag);
+					}
 					mMapView.invalidate();
 				}
 			});
@@ -61,4 +64,6 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 		
 		return true;
 	}
+	
+	
 }
