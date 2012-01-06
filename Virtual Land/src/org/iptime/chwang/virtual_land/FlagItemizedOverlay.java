@@ -22,12 +22,37 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 		mMapView=tmpMapView;
 	}
 	
+	private void overlaysIterator(){
+		Log.i("Chwang","============================================");
+		for(int i=0; i<size(); i++){
+			Log.i("Chwang","Index "+Integer.toString(i)+": "+mOverlays.get(i).getPoint().toString());
+		}
+		Log.i("Chwang","============================================");
+	}
+	
 	@Override
 	protected boolean onTap(int index){
 		final int mIndex=index;
 		
 		if(index==size()-1){
+			overlaysIterator();
 			
+			Log.i("Chwang","tapped index : "+Integer.toString(index));
+			
+			Log.i("Chwang","Before removing mOverlay.size()="+Integer.toString(mOverlays.size()));
+			
+			mOverlays.remove(index);
+			
+			
+			
+			Log.i("Chwang","After removing mOverlay.size()="+Integer.toString(mOverlays.size()));
+			
+			if(size()!=0) {
+				mOverlays.get(index-1).setMarker(drawable_blueflag);
+			}
+			mMapView.invalidate();
+			
+			/*
 			AlertDialog.Builder alertDlg=new AlertDialog.Builder(mContext);
 			alertDlg.setTitle("Remove a Flag");
 			alertDlg.setMessage("Do you really want to remove this blue flag?");
@@ -52,7 +77,7 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 			});
 			
 			alertDlg.show();
-			
+			*/
 			
 		}//end if
 		
