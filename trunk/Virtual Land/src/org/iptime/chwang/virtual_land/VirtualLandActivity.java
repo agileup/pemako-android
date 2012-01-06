@@ -83,6 +83,8 @@ public class VirtualLandActivity extends MapActivity {
 	PolyLine myPolyLine=null;
 	
 	
+	int checkCount=0;
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -129,7 +131,9 @@ public class VirtualLandActivity extends MapActivity {
 		
 		flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
 		
-        
+        overlay=mapView.getOverlays();
+        overlay.add(currentIO);
+        overlay.add(flagIO);
         
         
         //LocationManager 선언 및 초기화
@@ -174,8 +178,8 @@ public class VirtualLandActivity extends MapActivity {
         			if(buffer_overlayitem!=null) currentIO.removeOverlayItem(buffer_overlayitem);
         			
         			
-        			overlay=mapView.getOverlays();
-        			overlay.add(currentIO); //새로운 위치 표시 그리기 
+        			//overlay=mapView.getOverlays();
+        			//overlay.add(currentIO); //새로운 위치 표시 그리기 
         			//새로운 위치 표시 그리는 OverlayItem 오브젝트를 전역변수로 저장해둠 - 나중에 삭제 용이
         			buffer_overlayitem=overlayitem;
         			
@@ -306,18 +310,29 @@ public class VirtualLandActivity extends MapActivity {
         		
         		mc.setZoom(18);
         		
+        		
+        		//For Test
+        		//flagIO.mOverlays.
+        		
+        		
+        		
+        		//overlay=mapView.getOverlays();
+        		//overlay.remove(flagIO);
+        		
         		OverlayItem overlayitem=new OverlayItem(buffer_geopoint,"","");
         		
         		//Newly Added 20111216
         		flagIO.addOverlayItem(overlayitem);
+        		
         		Log.i("Chwang","After check, flagIO.size()="+flagIO.size());
         		
         		if(flagIO.size()>=2){
-        			flagIO.getItem(flagIO.size()-2).setMarker(drawable_redflag);
+        			flagIO.mOverlays.get(flagIO.mOverlays.size()-2).setMarker(drawable_redflag);
+        			//flagIO.getItem(flagIO.size()-2).setMarker(drawable_redflag);
         		}
         		
-        		overlay=mapView.getOverlays();
-        		overlay.add(flagIO);
+        		//overlay=mapView.getOverlays();
+        		//overlay.add(flagIO);
         		
         		
         		mapView.invalidate();
