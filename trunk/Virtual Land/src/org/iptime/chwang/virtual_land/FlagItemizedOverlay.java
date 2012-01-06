@@ -14,12 +14,17 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 	Drawable drawable_blueflag;
 	Context mContext;
 	MapView mMapView;
+	PolyLine mPolyLine;
+	int mIndex;
 	
 	public FlagItemizedOverlay(Drawable defaultMarker,Context tmpContext,MapView tmpMapView){
 		super(boundCenterBottom(defaultMarker));
 		drawable_blueflag=defaultMarker;
 		mContext=tmpContext;
 		mMapView=tmpMapView;
+		mPolyLine=new PolyLine();
+		
+		mMapView.getOverlays().add(mPolyLine);
 	}
 	
 	private void overlaysIterator(){
@@ -32,25 +37,19 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 	
 	@Override
 	protected boolean onTap(int index){
-		final int mIndex=index;
+		mIndex=index;
 		
 		if(index==size()-1){
+			
 			overlaysIterator();
-			
 			Log.i("Chwang","tapped index : "+Integer.toString(index));
-			
-			Log.i("Chwang","Before removing mOverlay.size()="+Integer.toString(mOverlays.size()));
-			
+			Log.i("Chwang","Before removing mOverlay.size()="+Integer.toString(mOverlays.size()));			
 			mOverlays.remove(index);
-			
-			
-			
+			mPolyLine.removeLastGeoPoint();
 			Log.i("Chwang","After removing mOverlay.size()="+Integer.toString(mOverlays.size()));
-			
-			if(size()!=0) {
-				mOverlays.get(index-1).setMarker(drawable_blueflag);
-			}
+			if(size()!=0) mOverlays.get(index-1).setMarker(drawable_blueflag);
 			mMapView.invalidate();
+			
 			
 			/*
 			AlertDialog.Builder alertDlg=new AlertDialog.Builder(mContext);
@@ -60,12 +59,17 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 			alertDlg.setPositiveButton("YES", new DialogInterface.OnClickListener() {		
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					overlaysIterator();
+					mPolyLine.removeLastGeoPoint();
 					mOverlays.remove(mIndex);
+					
 					Log.i("Chwang","FlagIO's mOverlays.size()="+Integer.toString(mIndex));
 					if(size()!=0) {
 						mOverlays.get(mIndex-1).setMarker(drawable_blueflag);
 					}
+					
 					mMapView.invalidate();
+					overlaysIterator();
 				}
 			});
 			

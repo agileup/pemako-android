@@ -323,6 +323,7 @@ public class VirtualLandActivity extends MapActivity {
         		
         		//Newly Added 20111216
         		flagIO.addOverlayItem(overlayitem);
+        		flagIO.mPolyLine.geoPoints.add(buffer_geopoint);
         		
         		Log.i("Chwang","After check, flagIO.size()="+flagIO.size());
         		
@@ -584,6 +585,8 @@ public class VirtualLandActivity extends MapActivity {
     }
     
     private boolean sendVertices(){
+    	Log.i("Chwang","sendVertices() called");
+    	
     	try{
         	URL url=new URL(SERVER_ADDR+"/vland/marking.php");
         	HttpURLConnection http=(HttpURLConnection)url.openConnection();
