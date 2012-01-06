@@ -317,46 +317,15 @@ public class VirtualLandActivity extends MapActivity {
         		}
         		
         		overlay=mapView.getOverlays();
-        		
-        		
-        		
-        		//Flag 사이 선그리기
-        		
-        		if(myPolyLine!=null) overlay.remove(myPolyLine);
-        		ArrayList<GeoPoint> geopoints=new ArrayList<GeoPoint>();
-        		for(int i=0; i<flagIO.size(); i++){
-        			geopoints.add(flagIO.getItem(i).getPoint());
-        		}
-        		myPolyLine=new PolyLine(geopoints);
-        		
-        		
-        		overlay.add(myPolyLine);
         		overlay.add(flagIO);
         		
-        		/*
-        		//Newly Added 20111213
-        		flagIO_removable.addOverlayItem(overlayitem);
-        		
-        		if(check_count!=0){
-        			flagIO.addOverlayItem(flagIO_removable.getItem(0));
-        			flagIO_removable.removeOverlayItem(0);
-        		}
-        		
-        		Log.i("Chwang",Integer.toString(flagIO.size()));
-        		Log.i("Chwang",Integer.toString(flagIO_removable.size()));
-        		
-    			overlay=mapView.getOverlays();
-    			if(flagIO.size()!=0) overlay.add(flagIO);
-    			if(flagIO_removable.size()!=0) overlay.add(flagIO_removable);
-    			*/
-    			
         		
         		mapView.invalidate();
     			
     			Log.i("Chwang",Integer.toString(overlay.size()));
     			
-        		//vertices.add(buffer_geopoint);
-        		
+    			
+    			
         		int numberOfFlags=flagIO.size();
         		
         		if(numberOfFlags>=4){

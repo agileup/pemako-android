@@ -15,12 +15,6 @@ public class FlagItemizedOverlay extends MyIconItemizedOverlay {
 	Context mContext;
 	MapView mMapView;
 	
-	/*
-	public RemovableItemizedOverlay(Drawable defaultMarker){
-		super(boundCenterBottom(defaultMarker));
-		//super(defaultMarker);
-	}
-	*/
 	public FlagItemizedOverlay(Drawable defaultMarker,Context tmpContext,MapView tmpMapView){
 		super(boundCenterBottom(defaultMarker));
 		drawable_blueflag=defaultMarker;
