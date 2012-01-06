@@ -18,10 +18,27 @@ public class PolyLine extends Overlay {
 
 	ArrayList<GeoPoint> geoPoints;
 	
+	//Constructor1
+	public PolyLine(){
+		geoPoints=new ArrayList<GeoPoint>();
+	}
+	
+	//Constructor2
 	public PolyLine(ArrayList<GeoPoint> points){
 		geoPoints=points;
 	}
 	
+	//function to add geopoint
+	public void addGeoPoint(GeoPoint tmpGeoPoint){
+		geoPoints.add(tmpGeoPoint);
+	}
+	
+	//function to remove the last geopoint
+	public void removeLastGeoPoint(){
+		geoPoints.remove(geoPoints.size()-1);
+	}
+	
+	//draw function (override)
 	public void draw (Canvas canvas, MapView mapView, boolean shadow){
 		//super.draw(canvas,mapView,shadow);
 		Log.i("Chwang","PolyLine.draw() called");
@@ -51,12 +68,4 @@ public class PolyLine extends Overlay {
 		
 	}
 	
-	public boolean removeLastGeoPoint(){
-		try{
-			geoPoints.remove(geoPoints.size()-1);
-			return true;
-		}catch(Exception e){
-			return false;
-		}
-	}
 }
