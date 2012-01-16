@@ -59,7 +59,7 @@ public class VirtualLandActivity extends MapActivity {
 	
 	GeoPoint buffer_geopoint=null; //체크할때 위치값 가져오려면 로케이션 리스너에서 미리 빼놔야 하는듯
 	OverlayItem buffer_overlayitem=null;
-	Boolean isFirst=true;
+	Boolean isFirst=false;
 	Boolean isFirst_gpsDialog=true;
 	
 	//onBackPressed() 에서 두번 터치 시 종료를 위해 선언한 변수들
@@ -72,16 +72,11 @@ public class VirtualLandActivity extends MapActivity {
     
 	CurrentLocationItemizedOverlay currentIO;
 	ArrayList<Tile> tileOverlays=new ArrayList<Tile>();
-	FlagItemizedOverlay flagIO;
-	
+	//FlagItemizedOverlay flagIO;
+	FlagOverlay flagoverlay;
 	
 	Drawable drawable_redflag;
 	Drawable drawable_blueflag;
-	
-	
-	
-	PolyLine myPolyLine=null;
-	
 	
 	int checkCount=0;
 	
@@ -129,12 +124,13 @@ public class VirtualLandActivity extends MapActivity {
 		drawable_blueflag=new BitmapDrawable(bitmap_blueflag);
 		drawable_blueflag.setBounds(-drawable_blueflag.getIntrinsicWidth()/2,-drawable_blueflag.getIntrinsicHeight(),drawable_blueflag.getIntrinsicWidth()/2,0);
 		
-		flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
+		//flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
+		flagoverlay=new FlagOverlay(drawable_redflag,drawable_blueflag,mapView,mContext);
 		
         overlay=mapView.getOverlays();
         overlay.add(currentIO);
-        overlay.add(flagIO);
-        
+        //overlay.add(flagIO);
+        overlay.add(flagoverlay);
         
         //LocationManager 선언 및 초기화
         LocationManager lm=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -318,19 +314,16 @@ public class VirtualLandActivity extends MapActivity {
         		
         		//overlay=mapView.getOverlays();
         		//overlay.remove(flagIO);
-        		
-        		OverlayItem overlayitem=new OverlayItem(buffer_geopoint,"","");
-        		
         		//Newly Added 20111216
+        		/*
         		flagIO.addOverlayItem(overlayitem);
         		flagIO.mPolyLine.geoPoints.add(buffer_geopoint);
+        		*/
         		
-        		Log.i("Chwang","After check, flagIO.size()="+flagIO.size());
+        		flagoverlay.addGeoPoint(buffer_geopoint);
         		
-        		if(flagIO.size()>=2){
-        			flagIO.mOverlays.get(flagIO.mOverlays.size()-2).setMarker(drawable_redflag);
-        			//flagIO.getItem(flagIO.size()-2).setMarker(drawable_redflag);
-        		}
+        		Log.i("Chwang","After check, flagoverlay.size()="+flagoverlay.size());
+        		
         		
         		//overlay=mapView.getOverlays();
         		//overlay.add(flagIO);
@@ -342,16 +335,17 @@ public class VirtualLandActivity extends MapActivity {
     			
     			
     			
-        		int numberOfFlags=flagIO.size();
+        		int numberOfFlags=flagoverlay.size();
         		
         		if(numberOfFlags>=4){
         			Location loc_first=new Location("First");
-            		loc_first.setLatitude((double)flagIO.createItem(0).getPoint().getLatitudeE6()/1000000);
-            		loc_first.setLongitude((double)flagIO.createItem(0).getPoint().getLongitudeE6()/1000000);
+        			
+            		loc_first.setLatitude((double)flagoverlay.getGeoPoint(0).getLatitudeE6()/1000000);
+            		loc_first.setLongitude((double)flagoverlay.getGeoPoint(0).getLongitudeE6()/1000000);
             		
             		Location loc_last=new Location("Last");
-            		loc_last.setLatitude((double)flagIO.createItem(numberOfFlags-1).getPoint().getLatitudeE6()/1000000);
-            		loc_last.setLongitude((double)flagIO.createItem(numberOfFlags-1).getPoint().getLongitudeE6()/1000000);
+            		loc_last.setLatitude((double)flagoverlay.getGeoPoint(numberOfFlags-1).getLatitudeE6()/1000000);
+            		loc_last.setLongitude((double)flagoverlay.getGeoPoint(numberOfFlags-1).getLongitudeE6()/1000000);
             		
             		String dist=Float.toString(loc_first.distanceTo(loc_last));
             		
@@ -599,11 +593,11 @@ public class VirtualLandActivity extends MapActivity {
         	http.setRequestProperty("content-type","application/x-www-form-urlencoded");
         	
         	StringBuffer buffer=new StringBuffer();
-        	int vertices_size=flagIO.size();
+        	int vertices_size=flagoverlay.size();
         	GeoPoint tmpGeoPoint;
         	
         	for(int i=0; i<vertices_size; i++){
-        		tmpGeoPoint=flagIO.getItem(i).getPoint();
+        		tmpGeoPoint=flagoverlay.getGeoPoint(i);
             	buffer.append("lat").append(i).append("=").append(tmpGeoPoint.getLatitudeE6()).append("&");
             	buffer.append("lon").append(i).append("=").append(tmpGeoPoint.getLongitudeE6()).append("&");
         	}
@@ -618,8 +612,8 @@ public class VirtualLandActivity extends MapActivity {
         	
         	
         	
-        	//flagIO 초기화
-        	flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
+        	//flagoverlay 초기화
+        	flagoverlay.removeAll();
         	
         	return true;
         	
