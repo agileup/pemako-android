@@ -11,12 +11,14 @@ import android.util.Log;
 
 public class MyIconItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 
-	protected ArrayList<OverlayItem> mOverlays=new ArrayList<OverlayItem>();
+	protected ArrayList<OverlayItem> mOverlays;
 	//private Context mContext;
 	
 	public MyIconItemizedOverlay(Drawable defaultMarker){
+		
 		super(boundCenterBottom(defaultMarker));
 		//super(defaultMarker);
+		mOverlays=new ArrayList<OverlayItem>();
 	}
 	
 	

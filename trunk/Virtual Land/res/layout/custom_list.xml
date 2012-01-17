@@ -37,14 +37,18 @@
                 android:layout_height="wrap_content" 
                 android:layout_width="wrap_content" 
                 android:id="@+id/custom_list_title_main" 
-                android:text="Main Title">               
+                android:text="Main Title"
+                android:textColor="#000000"
+                android:textStyle="bold">               
             </TextView>
                 
             <TextView 
                 android:layout_height="wrap_content" 
                 android:layout_width="wrap_content" 
                 android:id="@+id/custom_list_title_sub" 
-                android:text="Sub Title">         
+                android:text="Sub Title"
+                android:textColor="#444444"
+                android:textSize="10.0dp">         
             </TextView>
             
             
