@@ -102,7 +102,9 @@ public class FlagOverlay extends Overlay{
 	}
 	
 	public boolean onTouchEvent(MotionEvent event, MapView mapView){
+		
 		if(event.getAction()==1 && size()>0){
+			
 			int touchedX=(int)event.getX();
 			int touchedY=(int)event.getY();
 			
@@ -139,15 +141,12 @@ public class FlagOverlay extends Overlay{
 				
 				alertDlg.show();
 				
-				
-				
-				
-				
 			}else{
 				Log.i("Chwang","Removable Flag NOT touched");
 			}
 			
 		}
+		
 		return false;
 	}
 	

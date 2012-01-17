@@ -71,6 +71,8 @@ public class VirtualLandActivity extends MapActivity {
     //현재위치 표시 MyItemizedOverlay 선언 및 초기화
     
 	CurrentLocationItemizedOverlay currentIO;
+	CurrentLocationOverlay currentLocationOverlay;
+	
 	ArrayList<Tile> tileOverlays=new ArrayList<Tile>();
 	//FlagItemizedOverlay flagIO;
 	FlagOverlay flagoverlay;
@@ -112,6 +114,8 @@ public class VirtualLandActivity extends MapActivity {
 		Drawable drawable_current=new BitmapDrawable(bitmap_current);
 		currentIO=new CurrentLocationItemizedOverlay(drawable_current);
 		
+		currentLocationOverlay=new CurrentLocationOverlay(drawable_current);
+		
 		//플래그 오버레이(check시 표시하는 플래그) 비트맵 설정 및 FlagItemizedOverlay 변수 flagIO 초기화
 		Bitmap bitmap_redflag=BitmapFactory.decodeResource(getResources(), R.drawable.check_redflag);
 		bitmap_redflag=Bitmap.createScaledBitmap(bitmap_redflag, 50, 50, false);
@@ -128,9 +132,12 @@ public class VirtualLandActivity extends MapActivity {
 		flagoverlay=new FlagOverlay(drawable_redflag,drawable_blueflag,mapView,mContext);
 		
         overlay=mapView.getOverlays();
-        overlay.add(currentIO);
+        //overlay.add(currentIO);
+        overlay.add(currentLocationOverlay);
+        
         //overlay.add(flagIO);
         overlay.add(flagoverlay);
+        
         
         //LocationManager 선언 및 초기화
         LocationManager lm=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
@@ -170,6 +177,8 @@ public class VirtualLandActivity extends MapActivity {
         			
         			OverlayItem overlayitem=new OverlayItem(gp,"","");
         			currentIO.addOverlayItem(overlayitem);
+        			
+        			currentLocationOverlay.setGeoPoint(gp);
         			
         			if(buffer_overlayitem!=null) currentIO.removeOverlayItem(buffer_overlayitem);
         			
@@ -391,69 +400,6 @@ public class VirtualLandActivity extends MapActivity {
         	}//End of onClick
         }); //End of setOnClickListener
         
-        
-        
-        
-       //지도위에 올릴 COMMIT 버튼 임시로 만들기
-        /*
-        bt_commit=new Button(this);
-        bt_commit.setText("COMMIT");
-        bt_commit.setTextSize(15);
-        bt_commit.setTextColor(Color.BLACK);
-                
-        //버튼 레이아웃 파라미터
-        MapView.LayoutParams bt_commit_layout=new MapView.LayoutParams(150, 
-																	LayoutParams.WRAP_CONTENT, (int)(width*0.7), (int)(height*0.8), 
-																	MapView.LayoutParams.CENTER);
-        //레이아웃 파라미터와 함께 버튼을 맵뷰에 애드
-        mapView.addView(bt_commit,bt_commit_layout);
-    	
-        bt_commit.setOnClickListener(new OnClickListener(){
-        	public void onClick(View v){
-        		//Commit 버튼 터치시 실행될 코드
-        		myPolygon=new Polygon(vertices);
-        		overlay=mapView.getOverlays();
-                overlay.add(myPolygon);
-                mapView.invalidate();
-                
-                try{
-                	URL url=new URL("http://chwang.iptime.org/vland/marking.php");
-                	HttpURLConnection http=(HttpURLConnection)url.openConnection();
-                	
-                	http.setDefaultUseCaches(false);
-                	http.setDoInput(true);
-                	http.setDoOutput(true);
-                	http.setRequestMethod("POST");
-                	
-                	http.setRequestProperty("content-type","application/x-www-form-urlencoded");
-                	
-                	StringBuffer buffer=new StringBuffer();
-                	int vertices_size=vertices.size();
-                	
-                	for(int i=0; i<vertices_size; i++){
-	                	buffer.append("lat").append(i).append("=").append(vertices.get(i).getLatitudeE6()).append("&");
-	                	buffer.append("lon").append(i).append("=").append(vertices.get(i).getLongitudeE6()).append("&");
-                	}
-                	buffer.append("vertices_size").append("=").append(vertices_size);
-                	
-                	OutputStreamWriter outStream=new OutputStreamWriter(http.getOutputStream(),"UTF-8");
-                	PrintWriter writer=new PrintWriter(outStream);
-                	writer.write(buffer.toString());
-                	writer.flush();
-                	
-                	//InputStreamReader tmp=new InputStreamReader(http.getInputStream(),"UTF-8");
-                	
-                	
-                } catch(Exception e){
-                	//Exception Occurred
-                	Toast.makeText(getBaseContext(), "서버 혹은 네트워크 환경이 원활하지 못합니다", Toast.LENGTH_SHORT).show();
-                }
-                
-                
-        	}
-        }); //end of button_commit.setOnClickListener()
-        */
-        
     }//End-of-onCreate
     
     
@@ -478,15 +424,6 @@ public class VirtualLandActivity extends MapActivity {
     protected boolean isRouteDisplayed(){
     	return false;
     }
-    
-    
-    
-    @Override
-    public void onStart(){
-    	super.onStart();
-    	
-    }
-    
     
     
     @Override
