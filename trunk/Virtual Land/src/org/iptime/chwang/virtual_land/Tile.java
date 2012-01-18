@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -17,8 +18,12 @@ public class Tile extends Overlay {
 	
 	ArrayList<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
 	int tileColor;
+	MapView mapView;
+	Rect myRect;
 	
-	public Tile(GeoPoint center,int deltaLat, int deltaLon, int myColor){
+	public Tile(GeoPoint center,int deltaLat, int deltaLon, int myColor, MapView mapView){
+		
+		this.mapView=mapView;
 		
 		int centerLat=center.getLatitudeE6();
 		int centerLon=center.getLongitudeE6();
@@ -39,20 +44,32 @@ public class Tile extends Overlay {
 		
 		//Log.i("Chwang", "Right After Vertices are added to ArrayList");
 		
+		Point screenPoint1=new Point();
+		Point screenPoint2=new Point();
+		mapView.getProjection().toPixels(left_top,screenPoint1);
+		mapView.getProjection().toPixels(right_bottom,screenPoint2);
+		
+		myRect=new Rect(screenPoint1.x,screenPoint1.y,screenPoint2.x,screenPoint2.y);
+		
+		
+		
 		tileColor=myColor;
 		//Log.i("Chwang", "Right Before Tile Constructor Ends");
 	}
 	
 	@Override
 	public void draw (Canvas canvas, MapView mapView, boolean shadow){
+		
+		
 	    //Set the color and style
 	    Paint paint = new Paint();
 	    paint.setColor(tileColor);
-	    paint.setStyle(Paint.Style.FILL_AND_STROKE);    
+	    paint.setStyle(Paint.Style.FILL_AND_STROKE);
 	    paint.setAntiAlias(true);
 	    paint.setAlpha(30);
 	    
 	    //Create path and add points
+	    
 	    Path path = new Path();
 	    Point firstPoint = new Point();
 	    mapView.getProjection().toPixels(geoPoints.get(0), firstPoint);
@@ -67,6 +84,8 @@ public class Tile extends Overlay {
 	    path.lineTo(firstPoint.x, firstPoint.y);
 	    path.setLastPoint(firstPoint.x, firstPoint.y);
 	    canvas.drawPath(path, paint);
+	    
+	    //canvas.drawRect(myRect, paint);
 	    super.draw(canvas, mapView, shadow);
 	}
 }

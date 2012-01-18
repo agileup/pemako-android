@@ -44,6 +44,7 @@ import java.util.List;
 
 public class VirtualLandActivity extends MapActivity {
 	
+	//서버주소
 	final String SERVER_ADDR = "http://pemako.iptime.org";
 	
 	LocationListener mLocationListener;
@@ -51,15 +52,12 @@ public class VirtualLandActivity extends MapActivity {
 	MapController mc;
 	List<Overlay> overlay;
 	TextView status=null; //지도 화면 상단 위도경도 나타내는 텍스트뷰
-	//ArrayList<GeoPoint> vertices=new ArrayList<GeoPoint>(); //사용자가 폴리곤 그리기 위해 체크하는 꼭지점들
-	Polygon myPolygon=null;
 	ImageButton bt_check;
 	ImageButton bt_mission;
 	Context mContext;
 	
-	GeoPoint buffer_geopoint=null; //체크할때 위치값 가져오려면 로케이션 리스너에서 미리 빼놔야 하는듯
-	OverlayItem buffer_overlayitem=null;
-	Boolean isFirst=false;
+	GeoPoint buffer_geopoint=null;
+	Boolean isFirst=true;
 	Boolean isFirst_gpsDialog=true;
 	
 	//onBackPressed() 에서 두번 터치 시 종료를 위해 선언한 변수들
@@ -68,20 +66,17 @@ public class VirtualLandActivity extends MapActivity {
     private long timeSecond;
     
     
-    //현재위치 표시 MyItemizedOverlay 선언 및 초기화
-    
-	CurrentLocationItemizedOverlay currentIO;
+    //Overlay 변수들 선언
 	CurrentLocationOverlay currentLocationOverlay;
-	
 	ArrayList<Tile> tileOverlays=new ArrayList<Tile>();
-	//FlagItemizedOverlay flagIO;
 	FlagOverlay flagoverlay;
-	
 	Drawable drawable_redflag;
 	Drawable drawable_blueflag;
 	
-	int checkCount=0;
 	
+	
+    
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -112,8 +107,7 @@ public class VirtualLandActivity extends MapActivity {
         Bitmap bitmap_current=BitmapFactory.decodeResource(getResources(), R.drawable.current_gp);
 		bitmap_current=Bitmap.createScaledBitmap(bitmap_current, 15, 15, false);
 		Drawable drawable_current=new BitmapDrawable(bitmap_current);
-		currentIO=new CurrentLocationItemizedOverlay(drawable_current);
-		
+		drawable_current.setBounds(-drawable_current.getIntrinsicWidth()/2,-drawable_current.getIntrinsicHeight(),drawable_current.getIntrinsicWidth()/2,0);  
 		currentLocationOverlay=new CurrentLocationOverlay(drawable_current);
 		
 		//플래그 오버레이(check시 표시하는 플래그) 비트맵 설정 및 FlagItemizedOverlay 변수 flagIO 초기화
@@ -174,19 +168,9 @@ public class VirtualLandActivity extends MapActivity {
         			mc.animateTo(gp);
         			mc.setZoom(18);
         			
-        			
-        			OverlayItem overlayitem=new OverlayItem(gp,"","");
-        			currentIO.addOverlayItem(overlayitem);
-        			
         			currentLocationOverlay.setGeoPoint(gp);
         			
-        			if(buffer_overlayitem!=null) currentIO.removeOverlayItem(buffer_overlayitem);
         			
-        			
-        			//overlay=mapView.getOverlays();
-        			//overlay.add(currentIO); //새로운 위치 표시 그리기 
-        			//새로운 위치 표시 그리는 OverlayItem 오브젝트를 전역변수로 저장해둠 - 나중에 삭제 용이
-        			buffer_overlayitem=overlayitem;
         			
         			//서버 통신 테스트
         			if(isFirst==true){
@@ -243,7 +227,7 @@ public class VirtualLandActivity extends MapActivity {
         		            		 tileInfo[i][j]=Integer.parseInt(myTiles[i*30+j]);
         		            		 GeoPoint center=new GeoPoint(targetLat,targetLon);
         		            		 
-        		            		 tmpTiles[i*30+j]=new Tile(center,deltaLat,deltaLon,colorSelector(tileInfo[i][j]));
+        		            		 tmpTiles[i*30+j]=new Tile(center,deltaLat,deltaLon,colorSelector(tileInfo[i][j]),mapView);
         		            		 
         		            		 tileOverlays.add(tmpTiles[i*30+j]);
         		            		 
@@ -278,10 +262,12 @@ public class VirtualLandActivity extends MapActivity {
         
         
         
-        //디바이스 화면 해상도 계산
+      //디바이스 화면 해상도 계산
         Display display = getWindowManager().getDefaultDisplay();  
-        int width = display.getWidth(); 
-        int height = display.getHeight(); 
+        final int width = display.getWidth(); 
+        final int height = display.getHeight(); 
+        
+        
         
         //지도위에 올릴 CHECK 버튼 만들기 
         bt_check=new ImageButton(this);
@@ -307,42 +293,20 @@ public class VirtualLandActivity extends MapActivity {
         	public void onClick(View v){
         		//Check 버튼 터치시 실행될 코드
         		
-        		
         		if(buffer_geopoint==null){
         			Log.i("Chwang","buffer_geopoint is null in setOnClickListener");
+        			return;
         		}
         		
         		
         		mc.setZoom(18);
         		
-        		
-        		//For Test
-        		//flagIO.mOverlays.
-        		
-        		
-        		
-        		//overlay=mapView.getOverlays();
-        		//overlay.remove(flagIO);
-        		//Newly Added 20111216
-        		/*
-        		flagIO.addOverlayItem(overlayitem);
-        		flagIO.mPolyLine.geoPoints.add(buffer_geopoint);
-        		*/
-        		
         		flagoverlay.addGeoPoint(buffer_geopoint);
+        		mapView.invalidate();
+        		
         		
         		Log.i("Chwang","After check, flagoverlay.size()="+flagoverlay.size());
-        		
-        		
-        		//overlay=mapView.getOverlays();
-        		//overlay.add(flagIO);
-        		
-        		
-        		mapView.invalidate();
-    			
-    			Log.i("Chwang",Integer.toString(overlay.size()));
-    			
-    			
+        		Log.i("Chwang","Total overlay size="+Integer.toString(overlay.size()));
     			
         		int numberOfFlags=flagoverlay.size();
         		
@@ -415,7 +379,7 @@ public class VirtualLandActivity extends MapActivity {
     	}
     	if(!checkBackKey){
     		timeFirst=System.currentTimeMillis();
-    		Toast.makeText(getBaseContext(), "Baby One more time~♬", Toast.LENGTH_SHORT).show();
+    		Toast.makeText(getBaseContext(), "Press Back-key one more time to exit.", Toast.LENGTH_SHORT).show();
     		checkBackKey=true;
     	}
     }
@@ -545,9 +509,12 @@ public class VirtualLandActivity extends MapActivity {
         	writer.write(buffer.toString());
         	writer.flush();
         	
-        	//InputStreamReader tmp=new InputStreamReader(http.getInputStream(),"UTF-8");
+        	InputStreamReader tmp=new InputStreamReader(http.getInputStream(),"UTF-8");
+        	BufferedReader reader = new BufferedReader(tmp); 
+            String response=reader.readLine();
+            Log.i("Chwang","Server response: "+response);
         	
-        	
+        	Toast.makeText(getBaseContext(), "영토 선포가 완료되었습니다!", Toast.LENGTH_SHORT).show();
         	
         	//flagoverlay 초기화
         	flagoverlay.removeAll();
