@@ -132,7 +132,6 @@ public class VirtualLandActivity extends MapActivity {
         //overlay.add(flagIO);
         overlay.add(flagoverlay);
         
-        
         //LocationManager 선언 및 초기화
         LocationManager lm=(LocationManager)getSystemService(Context.LOCATION_SERVICE);
         

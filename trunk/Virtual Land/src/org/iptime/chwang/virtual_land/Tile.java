@@ -19,7 +19,7 @@ public class Tile extends Overlay {
 	ArrayList<GeoPoint> geoPoints = new ArrayList<GeoPoint>();
 	int tileColor;
 	MapView mapView;
-	Rect myRect;
+	
 	
 	public Tile(GeoPoint center,int deltaLat, int deltaLon, int myColor, MapView mapView){
 		
@@ -29,10 +29,16 @@ public class Tile extends Overlay {
 		int centerLon=center.getLongitudeE6();
 		
 		
-		
+		/*
 		GeoPoint left_top=new GeoPoint(centerLat + deltaLat/2, centerLon - deltaLon/2);
 		GeoPoint left_bottom=new GeoPoint(centerLat + deltaLat/2, centerLon + deltaLon/2);
 		GeoPoint right_top=new GeoPoint(centerLat - deltaLat/2, centerLon - deltaLon/2);
+		GeoPoint right_bottom=new GeoPoint(centerLat - deltaLat/2, centerLon + deltaLon/2);
+		*/
+		
+		GeoPoint left_top=new GeoPoint(centerLat + deltaLat/2, centerLon - deltaLon/2);
+		GeoPoint left_bottom=new GeoPoint(centerLat - deltaLat/2, centerLon - deltaLon/2);
+		GeoPoint right_top=new GeoPoint(centerLat + deltaLat/2, centerLon + deltaLon/2);
 		GeoPoint right_bottom=new GeoPoint(centerLat - deltaLat/2, centerLon + deltaLon/2);
 		
 		//Log.i("Chwang", "Right After Vertices Initializing");
@@ -49,9 +55,14 @@ public class Tile extends Overlay {
 		mapView.getProjection().toPixels(left_top,screenPoint1);
 		mapView.getProjection().toPixels(right_bottom,screenPoint2);
 		
-		myRect=new Rect(screenPoint1.x,screenPoint1.y,screenPoint2.x,screenPoint2.y);
-		
-		
+		/*
+		myRect=new Rect(screenPoint1.x,screenPoint2.y,screenPoint2.x,screenPoint1.y);
+		Log.i("Chwang","==================================");
+		Log.i("Chwang","Left: "+Integer.toString(screenPoint1.x));
+		Log.i("Chwang","Top: "+Integer.toString(screenPoint1.y));
+		Log.i("Chwang","Right: "+Integer.toString(screenPoint2.x));
+		Log.i("Chwang","Bottom: "+Integer.toString(screenPoint2.y));
+		*/
 		
 		tileColor=myColor;
 		//Log.i("Chwang", "Right Before Tile Constructor Ends");
@@ -64,12 +75,13 @@ public class Tile extends Overlay {
 	    //Set the color and style
 	    Paint paint = new Paint();
 	    paint.setColor(tileColor);
-	    paint.setStyle(Paint.Style.FILL_AND_STROKE);
+	    //paint.setStyle(Paint.Style.FILL_AND_STROKE);
+	    paint.setStyle(Paint.Style.FILL);
 	    paint.setAntiAlias(true);
 	    paint.setAlpha(30);
 	    
 	    //Create path and add points
-	    
+	    /*
 	    Path path = new Path();
 	    Point firstPoint = new Point();
 	    mapView.getProjection().toPixels(geoPoints.get(0), firstPoint);
@@ -79,13 +91,16 @@ public class Tile extends Overlay {
 	        Point nextPoint = new Point();
 	        mapView.getProjection().toPixels(geoPoints.get(i), nextPoint);
 	        path.lineTo(nextPoint.x, nextPoint.y);
+	        
 	    }    //Close polygon
 	    
 	    path.lineTo(firstPoint.x, firstPoint.y);
 	    path.setLastPoint(firstPoint.x, firstPoint.y);
 	    canvas.drawPath(path, paint);
+	    */
 	    
 	    //canvas.drawRect(myRect, paint);
+	    //Log.i("Chwang","Drawing myRect");
 	    super.draw(canvas, mapView, shadow);
 	}
 }
