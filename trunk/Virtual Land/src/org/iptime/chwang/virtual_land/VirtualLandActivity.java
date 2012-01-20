@@ -56,9 +56,12 @@ public class VirtualLandActivity extends MapActivity {
 	ImageButton bt_mission;
 	Context mContext;
 	
+	//onLocationChangeListener에서 위치정보 받아서 저장해두는 변수
 	GeoPoint buffer_geopoint=null;
+	
+	//처음 지도 띄울때만 영토정보 받아오기 위해 설정한 변수
 	Boolean isFirst=true;
-	Boolean isFirst_gpsDialog=true;
+	
 	
 	//onBackPressed() 에서 두번 터치 시 종료를 위해 선언한 변수들
 	private boolean checkBackKey=false;
@@ -68,11 +71,12 @@ public class VirtualLandActivity extends MapActivity {
     
     //Overlay 변수들 선언
 	CurrentLocationOverlay currentLocationOverlay;
-	ArrayList<Tile> tileOverlays=new ArrayList<Tile>();
 	FlagOverlay flagoverlay;
+	
+	//Overlay에 사용될 Drawable 변수들 선언
 	Drawable drawable_redflag;
 	Drawable drawable_blueflag;
-	
+	Drawable drawable_current;
 	
 	
     
@@ -106,7 +110,7 @@ public class VirtualLandActivity extends MapActivity {
         //현재위치 오버레이 비트맵 설정 및 CurrentLocationItemizedOverlay 변수 currentIO 초기화
         Bitmap bitmap_current=BitmapFactory.decodeResource(getResources(), R.drawable.current_gp);
 		bitmap_current=Bitmap.createScaledBitmap(bitmap_current, 15, 15, false);
-		Drawable drawable_current=new BitmapDrawable(bitmap_current);
+		drawable_current=new BitmapDrawable(bitmap_current);
 		drawable_current.setBounds(-drawable_current.getIntrinsicWidth()/2,-drawable_current.getIntrinsicHeight(),drawable_current.getIntrinsicWidth()/2,0);  
 		currentLocationOverlay=new CurrentLocationOverlay(drawable_current);
 		
@@ -122,14 +126,12 @@ public class VirtualLandActivity extends MapActivity {
 		drawable_blueflag=new BitmapDrawable(bitmap_blueflag);
 		drawable_blueflag.setBounds(-drawable_blueflag.getIntrinsicWidth()/2,-drawable_blueflag.getIntrinsicHeight(),drawable_blueflag.getIntrinsicWidth()/2,0);
 		
-		//flagIO=new FlagItemizedOverlay(drawable_blueflag,mContext,mapView);
+		
 		flagoverlay=new FlagOverlay(drawable_redflag,drawable_blueflag,mapView,mContext);
 		
+		
         overlay=mapView.getOverlays();
-        //overlay.add(currentIO);
         overlay.add(currentLocationOverlay);
-        
-        //overlay.add(flagIO);
         overlay.add(flagoverlay);
         
         //LocationManager 선언 및 초기화
@@ -144,6 +146,7 @@ public class VirtualLandActivity extends MapActivity {
         			Toast.makeText(getBaseContext(), 
         					"위도는 "+location.getLatitude()+", 경도는 "+location.getLongitude()+" 입니다.", 
         					Toast.LENGTH_SHORT).show();
+        			
         			//buffer_geopoint 초기화 및 새로 할당
         			buffer_geopoint=new GeoPoint((int)(location.getLatitude()*1E6),(int)(location.getLongitude()*1E6));
         			
@@ -162,12 +165,10 @@ public class VirtualLandActivity extends MapActivity {
         			
         			
         			
-        			GeoPoint gp=new GeoPoint((int)(location.getLatitude()*1000000),(int)(location.getLongitude()*1000000));
-        			
-        			mc.animateTo(gp);
+        			mc.animateTo(buffer_geopoint);
         			mc.setZoom(18);
         			
-        			currentLocationOverlay.setGeoPoint(gp);
+        			currentLocationOverlay.setGeoPoint(buffer_geopoint);
         			
         			
         			
@@ -216,31 +217,25 @@ public class VirtualLandActivity extends MapActivity {
         		             int targetLat=Integer.parseInt(myStarts[0]);
         		             int targetLon=Integer.parseInt(myStarts[1]);
         		             
-        		             int [][] tileInfo = new int [48][30];
         		             
-        		             Tile tmpTiles[] = new Tile [1440];
+        		             Tile newTile;
         		             
         		             for(int i=0; i<48; i++){
         		            	 targetLon=Integer.parseInt(myStarts[1]);
         		            	 for(int j=0; j<30; j++){
-        		            		 tileInfo[i][j]=Integer.parseInt(myTiles[i*30+j]);
-        		            		 GeoPoint center=new GeoPoint(targetLat,targetLon);
-        		            		 
-        		            		 tmpTiles[i*30+j]=new Tile(center,deltaLat,deltaLon,colorSelector(tileInfo[i][j]),mapView);
-        		            		 
-        		            		 tileOverlays.add(tmpTiles[i*30+j]);
+        		            		 int tileInfo=Integer.parseInt(myTiles[i*30+j]);
+        		            		 newTile=new Tile(targetLat,targetLon,deltaLat,deltaLon,tileInfo,mapView);
+        		            		 overlay.add(newTile);
         		            		 
         		            		 targetLon+=deltaLon;
         		            	 }
         		            	 targetLat-=deltaLat;
         		             }
         		             
-        		             overlay.addAll(tileOverlays);
-        		             
         		             isFirst=false;
+        		             
         		        }catch(Exception e){
         		        	Toast.makeText(getBaseContext(), "서버 혹은 네트워크 환경이 원활하지 못합니다", Toast.LENGTH_SHORT).show();
-        		        	Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         		        }
         			}
         		}
@@ -261,7 +256,7 @@ public class VirtualLandActivity extends MapActivity {
         
         
         
-      //디바이스 화면 해상도 계산
+        //디바이스 화면 해상도 계산
         Display display = getWindowManager().getDefaultDisplay();  
         final int width = display.getWidth(); 
         final int height = display.getHeight(); 
@@ -294,6 +289,7 @@ public class VirtualLandActivity extends MapActivity {
         		
         		if(buffer_geopoint==null){
         			Log.i("Chwang","buffer_geopoint is null in setOnClickListener");
+		        	Toast.makeText(getBaseContext(), "GPS 신호가 잡히지 않았습니다.", Toast.LENGTH_SHORT).show();
         			return;
         		}
         		
@@ -335,7 +331,7 @@ public class VirtualLandActivity extends MapActivity {
         }); //End of setOnClickListener
         
         
-      //지도위에 올릴 Mission 버튼 임시로 만들기 
+        //지도위에 올릴 Mission 버튼 임시로 만들기 
         bt_mission=new ImageButton(this);
         BitmapDrawable bitmapDrawable_mission=(BitmapDrawable)res.getDrawable(R.drawable.button_mission);
         Bitmap bitmap_mission=bitmapDrawable_mission.getBitmap();
@@ -396,42 +392,7 @@ public class VirtualLandActivity extends MapActivity {
     	lm.removeUpdates(mLocationListener);
     }
     
-    //Temporary Function
-    private int colorSelector(int input){
-    	int result=0xff000000;
-    	int tmp;
-    	int remain=input%7;
-    	
-    	switch(remain){
-	    	case 0:
-	    		tmp=0xe61a0b; //RED
-	    		break;
-	    	case 1:
-	    		tmp=0x09c016; //GREEN
-	    		break;
-	    	case 2:
-	    		tmp=0x1a0be6; //BLUE
-	    		break;
-	    	case 3:
-	    		tmp=0xf0ff32; //YELLOW
-	    		break;
-	    	case 4:
-	    		tmp=0xff32f0; //PLUM
-	    		break;
-	    	case 5:
-	    		tmp=0xa2988c; //Dark BEIGE 
-	    		break;
-	    	case 6:
-	    		tmp=0xc86e02; //Dark ORANGE
-	    		break;
-	    	default:
-	    		tmp=0x8fa9c8; //Cobalt
-	    		break;
-    	}
-    	
-    	result+=tmp;
-    	return result;
-    }//end of colorSelector()
+    
     
     public void gpsDialog(Context mContext){
     	AlertDialog.Builder alertDlg=new AlertDialog.Builder(mContext);
